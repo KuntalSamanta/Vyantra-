@@ -1,0 +1,9 @@
+# Web framework
+streamlit==1.30.0
+
+# Google Generative AI API
+google-generativeai==0.3.0
+
+# Optional utilities
+numpy
+pandas
