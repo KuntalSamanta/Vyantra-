@@ -23,6 +23,7 @@ vyantra-chatbot/
 │
 ├─ app.py            # Main Streamlit app
 ├─ logo.png          # Project logo
+├─ requirements.txt  # Python dependencies
 └─ README.md         # Project documentation
 
 
