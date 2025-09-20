@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import streamlit as st
 import google.generativeai as genai
 import base64
@@ -5,11 +7,11 @@ import random
 import datetime
 
 # -------------------- CONFIG --------------------
-API_KEY = "AIzaSyDFC1Wx_GZU0G9wufFttb0ZfTKzB_ei8Yg"
+load_dotenv(".env")
+API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.0-flash")
 chat = model.start_chat()
-
 # -------------------- PAGE CONFIG --------------------
 st.set_page_config(
     page_title="Vyantra - Your AI Friend",
@@ -137,13 +139,38 @@ for role, text, ts in st.session_state["messages"]:
     else:
         st.markdown(f"<div class='chat-bubble-bot'><b>Vyantra:</b> {text}<br><small>{ts}</small></div>", unsafe_allow_html=True)
 
+# -------------------- SYSTEM PRE-COMMAND --------------------
+pre_command = """
+You are Vyantra, a mental health support chatbot designed to help students 
+with stress, anxiety, motivation, and general mental well-being. 
+Your role is to provide emotional support, coping strategies, 
+and gentle consultation for mental health.
+
+Rules:
+1. Only answer questions related to mental health and student well-being.  
+2. If the user asks about anything unrelated (like coding, math, random facts, etc.), 
+   politely reply: "⚕️ I am a medical chatbot created to support mental health, so I cannot provide an answer to that."  
+3. If the user asks a mental health-related question but you don’t know the answer, 
+   reply: "🙏 I may not have the right answer for this. Please consider consulting our doctor for proper guidance."  
+4. Always be empathetic, encouraging, and supportive in tone.
+"""
+
+# # Send pre-command as the first system message
+# chat.send_message(pre_command)
+
+
 # -------------------- USER INPUT --------------------
+# Start chat only once and send pre_command once
+if "chat" not in st.session_state:
+    st.session_state.chat = model.start_chat()
+    st.session_state.chat.send_message(pre_command)
+
 user_input = st.chat_input("Type your message...")
 if user_input:
     timestamp = datetime.datetime.now().strftime("%H:%M")
     st.session_state["messages"].append(("user", user_input, timestamp))
 
-    response = chat.send_message(user_input)
+    response = st.session_state.chat.send_message(user_input)
     bot_reply = response.text
     st.session_state["messages"].append(("bot", bot_reply, timestamp))
 
@@ -151,3 +178,4 @@ if user_input:
 
 # -------------------- FOOTER --------------------
 st.markdown('<div class="footer">© 2025 Vyantra | The mantra of life breath</div>', unsafe_allow_html=True)
+
